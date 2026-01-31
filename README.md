@@ -1,5 +1,7 @@
 # YAIM904 d04b – Robots with Unlimited Electricity ⚡🤖
 
+---
+
 ## 📦 Description
 
 **YAIM904 d04b – Robots with Unlimited Electricity** adds special versions of construction and logistic robots that **do not consume electricity while working**.
@@ -47,7 +49,7 @@ No settings or configuration are required.
 
 ## ❤️ Support
 
-Suggestions, ideas, and balance feedback are welcome on the GitHub repository.
+Suggestions, ideas and balance feedback are welcome on the GitHub repository.
 
 ---
 

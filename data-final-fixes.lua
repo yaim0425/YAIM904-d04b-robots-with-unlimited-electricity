@@ -28,7 +28,7 @@ function This_MOD.start()
     --- Modificar los elementos
     for _, spaces in pairs(This_MOD.to_be_processed) do
         for _, space in pairs(spaces) do
-            --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+            --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
             --- Crear los elementos
             This_MOD.create_item(space)
@@ -36,12 +36,9 @@ function This_MOD.start()
             This_MOD.create_recipe(space)
             This_MOD.create_tech(space)
 
-            --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+            --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
         end
     end
-
-    --- Fijar las posiciones actual
-    GMOD.d00b.change_orders()
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 end
@@ -112,7 +109,7 @@ function This_MOD.get_elements()
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
     local function validate_entity(item, entity)
-        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+        --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
         --- Validación
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
@@ -135,7 +132,7 @@ function This_MOD.get_elements()
             This_MOD.id .. "-" ..
             That_MOD.name
 
-        if GMOD.entities[Name] then return end
+        if GMOD.entity[Name] then return end
 
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
@@ -148,13 +145,18 @@ function This_MOD.get_elements()
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
         local Space = {}
+        Space.name = Name
         Space.item = item
         Space.entity = entity
-        Space.name = Name
 
         Space.recipe = GMOD.recipes[Space.item.name]
         Space.tech = GMOD.get_technology(Space.recipe)
+
         Space.recipe = Space.recipe and Space.recipe[1] or nil
+
+        for key, value in pairs(Space) do
+            Space[key] = GMOD.copy_with_format(value)
+        end
 
         --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
@@ -182,8 +184,8 @@ function This_MOD.get_elements()
     --- Buscar las entidades a afectar
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
-    for item_name, entity in pairs(GMOD.entities) do
-        validate_entity(GMOD.items[item_name], entity)
+    for item_name, entity in pairs(GMOD.entity) do
+        validate_entity(GMOD.item[item_name], entity)
     end
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -224,7 +226,6 @@ function This_MOD.create_item(space)
     Item.name = space.name
 
     --- Apodo y descripción
-    Item.localised_name = GMOD.copy(space.entity.localised_name)
     Item.localised_description = { "" }
 
     --- Agregar indicador del MOD
@@ -260,10 +261,10 @@ function This_MOD.create_item(space)
 
         --- Renombrar
         local Subgroup = GMOD.subgroups[Item.subgroup]
-        local Order = GMOD.subgroups[space.item.subgroup].order
+        local oldOrder = GMOD.subgroups[space.item.subgroup].order or ""
 
         --- Actualizar el order
-        Subgroup.order = 9 .. Order:sub(2)
+        Subgroup.order = oldOrder .. "-04"
     end
 
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
@@ -314,7 +315,6 @@ function This_MOD.create_entity(space)
     Entity.name = space.name
 
     --- Nombre
-    Entity.localised_name = GMOD.copy(space.entity.localised_name)
     Entity.localised_description = { "" }
 
     --- Agregar indicador del MOD
@@ -385,7 +385,6 @@ function This_MOD.create_recipe(space)
     Recipe.main_product = nil
 
     --- Apodo y descripción
-    Recipe.localised_name = GMOD.copy(space.entity.localised_name)
     Recipe.localised_description = { "" }
 
     --- Agregar indicador del MOD
@@ -396,7 +395,7 @@ function This_MOD.create_recipe(space)
     Recipe.enabled = space.tech == nil
 
     --- Nombre del nuevo subgrupo
-    Recipe.subgroup = GMOD.items[space.name].subgroup
+    Recipe.subgroup = GMOD.item[space.name].subgroup
 
     --- Tiempo de fabricación
     Recipe.energy_required = 3 * Recipe.energy_required
@@ -487,7 +486,6 @@ function This_MOD.create_tech(space)
     table.insert(Tech.icons, This_MOD.indicator_tech)
 
     --- Apodo y descripción
-    Tech.localised_name = GMOD.copy(space.entity.localised_name)
     Tech.localised_description = { "" }
 
     --- Tech previas
